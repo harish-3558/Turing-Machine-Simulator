@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turing Machine Simulator | Visual TOC Lab</title>
+  <meta name="description" content="Interactive Turing Machine Simulator with state diagram, transition table, and step-by-step visualization." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="bg-grid"></div>
+
+  <!-- ══ HEADER ══ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-tm">TM</span>
+        <span class="logo-bracket">]</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-sub">Turing Machine Simulator</span>
+      </div>
+      <p class="header-tagline">Visual Computation Laboratory · Theory of Computation</p>
+    </div>
+    <!-- Live counters -->
+    <div class="header-stats">
+      <div class="hstat"><span class="hstat-label">STEPS</span><span class="hstat-val" id="hstat-steps">0</span></div>
+      <div class="hstat"><span class="hstat-label">STATE</span><span class="hstat-val" id="hstat-state">—</span></div>
+      <div class="hstat"><span class="hstat-label">HEAD</span><span class="hstat-val" id="hstat-head">—</span></div>
+    </div>
+  </header>
+
+  <!-- ══ LAYOUT ══ -->
+  <div class="app-layout">
+
+    <!-- ═══ LEFT SIDEBAR ═══ -->
+    <aside class="sidebar">
+
+      <!-- Machine Selector -->
+      <div class="panel" id="panel-machine">
+        <div class="panel-hd"><div class="panel-dot dot-teal"></div><span>Machine</span></div>
+        <div class="select-wrap">
+          <select id="machine-select" class="fselect" onchange="onMachineChange()">
+            <option value="even-ones">Even Number of 1s</option>
+            <option value="palindrome">Binary Palindrome</option>
+            <option value="anbn">aⁿbⁿ Language</option>
+            <option value="increment">Binary Increment</option>
+            <option value="wcwr">wcwᴿ Recognizer</option>
+            <option value="div3">Binary Divisible by 3</option>
+            <option value="equal-ab">Equal a's and b's</option>
+            <option value="a2nb">a²ⁿbⁿ Language</option>
+          </select>
+          <span class="sel-arrow">▾</span>
+        </div>
+        <p class="machine-desc" id="machine-desc"></p>
+      </div>
+
+      <!-- Input -->
+      <div class="panel" id="panel-input">
+        <div class="panel-hd"><div class="panel-dot dot-violet"></div><span>Tape Input</span></div>
+        <div class="input-wrap">
+          <input type="text" id="tape-input" class="finput" placeholder="e.g. 1 1 0 1 1" autocomplete="off" spellcheck="false" />
+        </div>
+        <p class="input-hint">Symbols separated by spaces. Blank = B</p>
+        <div class="quick-inputs" id="quick-inputs"></div>
+      </div>
+
+      <!-- Speed -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-dot dot-blue"></div><span>Speed</span></div>
+        <input type="range" id="speed-range" class="frange" min="1" max="10" value="5" oninput="updateSpeedLabel()" />
+        <div class="speed-row">
+          <span class="speed-lbl">SLOW</span>
+          <span class="speed-val" id="speed-val">5×</span>
+          <span class="speed-lbl">FAST</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="panel controls-panel">
+        <div class="panel-hd"><div class="panel-dot dot-green"></div><span>Controls</span></div>
+        <div class="btn-grid">
+          <button class="tbtn tbtn-run"   id="btn-run"   onclick="tmRun()">  <span>▶</span> RUN</button>
+          <button class="tbtn tbtn-step"  id="btn-step"  onclick="tmStep()"> <span>⏭</span> STEP</button>
+          <button class="tbtn tbtn-pause" id="btn-pause" onclick="tmPause()" disabled><span>⏸</span> PAUSE</button>
+          <button class="tbtn tbtn-reset" id="btn-reset" onclick="tmReset()"><span>↺</span> RESET</button>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="panel result-panel" id="result-panel">
+        <div id="result-idle" class="result-block">
+          <div class="result-orb orb-idle"></div>
+          <span class="result-txt idle-txt">Ready to simulate</span>
+        </div>
+        <div id="result-accept" class="result-block hidden">
+          <div class="result-orb orb-accept pulse-accept"></div>
+          <div>
+            <div class="result-txt accept-txt">✓ ACCEPTED</div>
+            <div class="result-sub" id="accept-sub"></div>
+          </div>
+        </div>
+        <div id="result-reject" class="result-block hidden">
+          <div class="result-orb orb-reject pulse-reject"></div>
+          <div>
+            <div class="result-txt reject-txt">✗ REJECTED</div>
+            <div class="result-sub" id="reject-sub"></div>
+          </div>
+        </div>
+      </div>
+
+    </aside><!-- /sidebar -->
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="main-content">
+
+      <!-- ── TAPE VISUALIZER ── -->
+      <section class="content-card" id="card-tape">
+        <div class="card-hd">
+          <div class="chd-left">
+            <div class="card-dot dot-teal"></div>
+            <h2 class="card-title">Tape · Read/Write Head</h2>
+          </div>
+          <div class="state-row" id="state-row">
+            <div class="sinfo"><span class="sk">State</span><span class="sv teal" id="disp-state">—</span></div>
+            <div class="sdiv"></div>
+            <div class="sinfo"><span class="sk">Symbol</span><span class="sv violet" id="disp-sym">—</span></div>
+            <div class="sdiv"></div>
+            <div class="sinfo"><span class="sk">Direction</span><span class="sv blue" id="disp-dir">—</span></div>
+          </div>
+        </div>
+        <div class="tape-track-wrap">
+          <div class="tape-rail top"></div>
+          <div class="tape-viewport" id="tape-viewport">
+            <div class="tape-wrap" id="tape-wrap"></div>
+          </div>
+          <div class="tape-rail bottom"></div>
+        </div>
+        <div class="head-row" id="head-row">
+          <div class="head-indicator" id="head-indicator">
+            <div class="hi-shaft"></div>
+            <div class="hi-tip">▲</div>
+            <div class="hi-label">HEAD</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── STATE DIAGRAM ── -->
+      <section class="content-card" id="card-diagram">
+        <div class="card-hd">
+          <div class="chd-left">
+            <div class="card-dot dot-violet"></div>
+            <h2 class="card-title">State Transition Diagram</h2>
+          </div>
+          <div class="diagram-legend">
+            <div class="dl-item"><div class="dl-dot" style="background:#00ffe0"></div><span>Unvisited</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#d580ff"></div><span>Active</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#ffe066"></div><span>Visited ✓</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#5dffa0"></div><span>Accept</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#ff6b6b"></div><span>Reject</span></div>
+          </div>
+        </div>
+        <div class="diagram-wrap">
+          <canvas id="tm-diagram" class="tm-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- ── TRANSITION TABLE ── -->
+      <section class="content-card" id="card-table">
+        <div class="card-hd">
+          <div class="chd-left">
+            <div class="card-dot dot-blue"></div>
+            <h2 class="card-title">Transition Function  δ(q, σ) → (q', σ', D)</h2>
+          </div>
+          <div class="table-note">Active rule highlighted in violet</div>
+        </div>
+        <div class="table-wrap">
+          <table class="trans-table" id="trans-table">
+            <thead><tr id="trans-thead"></tr></thead>
+            <tbody id="trans-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── STEP HISTORY ── -->
+      <section class="content-card" id="card-history">
+        <div class="card-hd">
+          <div class="chd-left">
+            <div class="card-dot dot-orange"></div>
+            <h2 class="card-title">Step-by-Step Execution History</h2>
+          </div>
+          <button class="clear-log-btn" onclick="clearHistory()">Clear</button>
+        </div>
+        <!-- Summary Table -->
+        <div class="table-wrap">
+          <table class="step-table" id="step-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>State</th>
+                <th>Read</th>
+                <th>Write</th>
+                <th>Move</th>
+                <th>Next State</th>
+                <th>Tape Snapshot</th>
+              </tr>
+            </thead>
+            <tbody id="step-tbody">
+              <tr class="empty-row"><td colspan="7">No steps yet — press STEP or RUN</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main><!-- /main-content -->
+
+  </div><!-- /app-layout -->
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="site-footer">
+    <span>Turing Machine Simulator</span>
+    <span class="fdot">·</span>
+    <span>Theory of Computation</span>
+    <span class="fdot">·</span>
+    <span>HTML · CSS · JavaScript</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
