@@ -1,7 +1,4 @@
-/**
- * Turing Machine Simulator
- * Features: State Diagram (Canvas), Transition Table, Step History, 5 Machines
- */
+
 
 /* ══════════════════ MACHINE DEFINITIONS ══════════════════ */
 const MACHINES = {
