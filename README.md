@@ -1,5 +1,7 @@
 # Turing Machine — Theory & Concepts
 
+This simulator lets you load a predefined Turing Machine, enter an input string, and watch it execute step by step — showing the tape head movement, current state, and each transition rule applied in real time. It visually traces the full computation path until the machine either **accepts** or **rejects** the input, making abstract TM theory concrete and easy to follow.
+
 A comprehensive reference on how **Turing Machines** work, covering formal definitions, components, transition functions, language classes, and worked examples.
 
 ---
