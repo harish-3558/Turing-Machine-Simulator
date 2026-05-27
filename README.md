@@ -242,4 +242,4 @@ q0 sees □ with no remaining b's → ACCEPT ✅
 
 ---
 
-*Reference: Sipser, M. (2012). Introduction to the Theory of Computation (3rd ed.). Cengage Learning.*
+*Reference: Sipser, M. (2012). Introduction to the Theory of Computation (3rd ed.).Cengage Learning.*
